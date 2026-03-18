@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 
-def compute_driver_stats(hist_df: pd.DataFrame, circuit: str = "China") -> pd.DataFrame:
+def compute_driver_stats(hist_df: pd.DataFrame, circuit: str = "Japan") -> pd.DataFrame:
     """
     Compute aggregated driver performance statistics from historical data.
     Returns a DataFrame indexed by driver name.
@@ -36,7 +36,7 @@ def compute_driver_stats(hist_df: pd.DataFrame, circuit: str = "China") -> pd.Da
         sprint_avg_finish = sprint_grp["finish_position"].mean() if len(sprint_grp) > 0 else avg_finish
         sprint_win_rate = (sprint_grp["finish_position"] == 1).mean() if len(sprint_grp) > 0 else win_rate
 
-        # Shanghai-specific
+        # Suzuka-specific
         sh_grp = grp[grp["circuit"] == circuit]
         sh_avg_finish = sh_grp["finish_position"].mean() if len(sh_grp) > 0 else avg_finish
         sh_podium_rate = (sh_grp["finish_position"] <= 3).mean() if len(sh_grp) > 0 else podium_rate
@@ -56,8 +56,8 @@ def compute_driver_stats(hist_df: pd.DataFrame, circuit: str = "China") -> pd.Da
             "dnf_rate": round(dnf_rate, 4),
             "avg_grid": round(avg_grid, 3),
             "grid_finish_delta": round(grid_finish_delta, 3),
-            "shanghai_avg_finish": round(sh_avg_finish, 3),
-            "shanghai_podium_rate": round(sh_podium_rate, 4),
+            "suzuka_avg_finish": round(sh_avg_finish, 3),
+            "suzuka_podium_rate": round(sh_podium_rate, 4),
             "avg_laptime": round(avg_laptime, 3),
             "skill_rating": grp["driver_skill"].iloc[0],
             "constructor_pace": grp["constructor_pace"].iloc[0],
@@ -94,8 +94,8 @@ def build_training_features(hist_df: pd.DataFrame) -> tuple:
             "win_rate": ds["win_rate"],
             "dnf_rate": ds["dnf_rate"],
             "grid_finish_delta": ds["grid_finish_delta"],
-            "shanghai_avg_finish": ds["shanghai_avg_finish"],
-            "shanghai_podium_rate": ds["shanghai_podium_rate"],
+            "suzuka_avg_finish": ds["suzuka_avg_finish"],
+            "suzuka_podium_rate": ds["suzuka_podium_rate"],
             "avg_laptime": row["lap_time"],
             "pit_stops": row["pit_stops"],
             "tire_hard": int(row["tire_compound"] == "Hard"),
@@ -199,7 +199,7 @@ def build_ranking_features(hist_df: pd.DataFrame) -> tuple:
 
 def build_2026_prediction_features(grid_df: pd.DataFrame, driver_stats: pd.DataFrame) -> pd.DataFrame:
     """
-    Build prediction feature matrix for the 2026 Chinese GP drivers.
+    Build prediction feature matrix for the 2026 Japanese GP drivers.
     Merges grid data with historical driver statistics.
     """
     rows = []
@@ -216,8 +216,8 @@ def build_2026_prediction_features(grid_df: pd.DataFrame, driver_stats: pd.DataF
             sprint_win_rate = ds["sprint_win_rate"]
             dnf_rate = ds["dnf_rate"]
             grid_finish_delta = ds["grid_finish_delta"]
-            sh_avg_finish = ds["shanghai_avg_finish"]
-            sh_podium_rate = ds["shanghai_podium_rate"]
+            sh_avg_finish = ds["suzuka_avg_finish"]
+            sh_podium_rate = ds["suzuka_podium_rate"]
         else:
             # Rookie defaults based on skill
             avg_finish = 12.0 - row["driver_skill"] * 5
@@ -247,8 +247,8 @@ def build_2026_prediction_features(grid_df: pd.DataFrame, driver_stats: pd.DataF
             "sprint_win_rate": round(sprint_win_rate, 4),
             "dnf_rate": round(dnf_rate, 4),
             "grid_finish_delta": round(grid_finish_delta, 3),
-            "shanghai_avg_finish": round(sh_avg_finish, 3),
-            "shanghai_podium_rate": round(sh_podium_rate, 4),
+            "suzuka_avg_finish": round(sh_avg_finish, 3),
+            "suzuka_podium_rate": round(sh_podium_rate, 4),
             "avg_laptime": 92.0 - row["pace_score"] * 4 + np.random.normal(0, 0.1),
             "pit_stops": 1,
             "tire_hard": 0,
@@ -259,7 +259,7 @@ def build_2026_prediction_features(grid_df: pd.DataFrame, driver_stats: pd.DataF
             "tire_degradation": 0.22,
             "overtaking_ability": row["overtaking_ability"],
             "consistency_score": row["consistency_score"],
-            "shanghai_track_factor": row["shanghai_track_factor"],
+            "suzuka_track_factor": row["suzuka_track_factor"],
         })
 
     return pd.DataFrame(rows)

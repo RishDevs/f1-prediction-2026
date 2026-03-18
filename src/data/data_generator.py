@@ -174,8 +174,8 @@ def generate_historical_data(seed: int = 42) -> pd.DataFrame:
 
         for race_num, circuit in enumerate(circuits_year, 1):
             race_id += 1
-            is_sprint = circuit in ["China", "Brazil", "Qatar", "Miami", "Belgium"] and year >= 2021
-            is_shanghai = circuit == "China"
+            is_sprint = circuit in ["China", "Brazil", "Qatar", "Miami", "Belgium", "Japan"] and year >= 2021
+            is_suzuka = circuit == "Japan"
 
             # Construct pace scores for each team this race (add small race-by-race variance)
             pace_scores = {}
@@ -241,7 +241,7 @@ def generate_historical_data(seed: int = 42) -> pd.DataFrame:
                     "circuit": circuit,
                     "race_num": race_num,
                     "is_sprint": is_sprint,
-                    "is_shanghai": is_shanghai,
+                    "is_suzuka": is_suzuka,
                     "driver": driver_name,
                     "team": team,
                     "grid_position": grid,
@@ -255,7 +255,7 @@ def generate_historical_data(seed: int = 42) -> pd.DataFrame:
                     "weather": weather,
                     "safety_car": int(safety_car),
                     "finish_position": finish,
-                    "points": max(0, [25,18,15,12,10,8,6,4,2,1]+[0]*10)[finish - 1] if finish <= 10 else 0,
+                    "points": ([25,18,15,12,10,8,6,4,2,1]+[0]*15)[finish - 1] if finish <= 10 else 0,
                     "dnf": int(dnf_mask[drivers_year.index((driver_name, team))]),
                 })
 
@@ -264,39 +264,61 @@ def generate_historical_data(seed: int = 42) -> pd.DataFrame:
 
 def generate_2026_grid(seed: int = 99) -> pd.DataFrame:
     """
-    Generate the 2026 Chinese GP starting grid features for prediction.
-    Incorporates actual Free Practice 1 results from March 13, 2026.
+    Generate the 2026 Japanese GP starting grid features for prediction.
+    Incorporates simulated Free Practice 1 results for Suzuka.
     """
     rng = np.random.default_rng(seed)
     records = []
 
-    # Actual FP1 Timings (March 13, 2026)
-    fp1_results = {
-        "George Russell":    1 * 60 + 32.741,
-        "Kimi Antonelli":    1 * 60 + 32.861,
-        "Lando Norris":      1 * 60 + 33.296,
-        "Oscar Piastri":     1 * 60 + 33.472,
-        "Charles Leclerc":   1 * 60 + 33.599,
-        "Lewis Hamilton":    1 * 60 + 34.129,
-        "Oliver Bearman":    1 * 60 + 34.426,
-        "Max Verstappen":    1 * 60 + 34.541,
-        "Nico Hulkenberg":   1 * 60 + 34.639,
-        "Pierre Gasly":      1 * 60 + 34.676,
-        "Liam Lawson":       1 * 60 + 34.773,
-        "Gabriel Bortoleto": 1 * 60 + 34.828,
-        "Isack Hadjar":      1 * 60 + 34.856,
-        "Esteban Ocon":      1 * 60 + 34.877,
-        "Franco Colapinto":  1 * 60 + 34.947,
-        "Alexander Albon":   1 * 60 + 35.480,
-        "Carlos Sainz":      1 * 60 + 35.679,
-        "Fernando Alonso":   1 * 60 + 35.856,
-        "Valtteri Bottas":   1 * 60 + 36.057,
-        "Lance Stroll":      1 * 60 + 37.224,
-        "Arvid Lindblad":    1 * 60 + 37.896,
-        "Sergio Perez":      1 * 60 + 39.200,
-    }
+    try:
+        import urllib.request
+        import json
+        import ssl
+        from datetime import datetime, timezone
+        
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        
+        req = urllib.request.Request("https://api.openf1.org/v1/sessions?session_name=Practice%201")
+        with urllib.request.urlopen(req, context=ctx) as response:
+            sessions = json.loads(response.read().decode('utf-8'))
+            
+        now_iso = datetime.now(timezone.utc).isoformat()
+        past_sessions = [s for s in sessions if s['date_start'] < now_iso]
+        latest_session = sorted(past_sessions, key=lambda x: x['date_start'], reverse=True)[0]
+        session_key = latest_session['session_key']
+        
+        req = urllib.request.Request(f"https://api.openf1.org/v1/laps?session_key={session_key}")
+        with urllib.request.urlopen(req, context=ctx) as response:
+            laps = json.loads(response.read().decode('utf-8'))
+            
+        req = urllib.request.Request(f"https://api.openf1.org/v1/drivers?session_key={session_key}")
+        with urllib.request.urlopen(req, context=ctx) as response:
+            drivers = json.loads(response.read().decode('utf-8'))
+            
+        driver_map = {d['driver_number']: d['full_name'] for d in drivers}
+        
+        best_laps = {}
+        for lap in laps:
+            if lap.get('lap_duration'):
+                d_num = lap['driver_number']
+                dur = lap['lap_duration']
+                if d_num not in best_laps or dur < best_laps[d_num]:
+                    best_laps[d_num] = dur
+                    
+        fp1_results = {}
+        for d_num, dur in best_laps.items():
+            if d_num in driver_map:
+                name_parts = driver_map[d_num].split()
+                formatted_name = " ".join([p.capitalize() for p in name_parts])
+                fp1_results[formatted_name] = dur
+                
+    except Exception as e:
+        print(f"Warning: OpenF1 API fetch failed: {e}. Falling back to defaults.")
+        fp1_results = {}
 
-    best_fp1 = min(fp1_results.values())
+    best_fp1 = min(fp1_results.values()) if fp1_results else 90.0
 
     # 2026 qualifying simulation for the Chinese GP, heavily weighted by FP1
     pace_scores = {}
@@ -326,10 +348,10 @@ def generate_2026_grid(seed: int = 99) -> pd.DataFrame:
         skill = DRIVER_SKILL_2026[name]
         con_pace = CONSTRUCTOR_PACE_2026[team]
 
-        # Historical Shanghai track performance factor
-        shanghai_factor = rng.uniform(0.85, 1.0)
+        # Historical Suzuka track performance factor
+        suzuka_factor = rng.uniform(0.85, 1.0)
         if name in ["Lewis Hamilton", "Max Verstappen", "Fernando Alonso"]:
-            shanghai_factor = rng.uniform(0.93, 1.0)
+            suzuka_factor = rng.uniform(0.93, 1.0)
 
         records.append({
             "driver": name,
@@ -340,7 +362,7 @@ def generate_2026_grid(seed: int = 99) -> pd.DataFrame:
             "driver_skill": skill,
             "constructor_pace": con_pace,
             "pace_score": round(pace, 4),
-            "shanghai_track_factor": round(shanghai_factor, 3),
+            "suzuka_track_factor": round(suzuka_factor, 3),
             "tire_compound": rng.choice(["Soft", "Medium"], p=[0.6, 0.4]),
             "weather": "Dry",
             "safety_car_prob": 0.42,

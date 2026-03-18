@@ -1,5 +1,5 @@
 """
-app.py  –  F1 2026 Chinese GP AI Prediction Dashboard
+app.py  –  F1 2026 Japanese GP AI Prediction Dashboard
 A premium, dark-mode Streamlit application integrating LightGBM, XGBoost,
 LambdaRank, and Monte Carlo simulation to predict Sprint and Grand Prix outcomes.
 """
@@ -35,7 +35,7 @@ from src.models.monte_carlo import MonteCarloSimulator
 # Page configuration
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="F1 2026 Chinese GP – AI Prediction",
+    page_title="F1 2026 Japanese GP – AI Prediction",
     page_icon="🏎️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -261,7 +261,7 @@ def load_and_train(mc_runs: int = 10_000, mc_seed: int = 42):
     # ── 1. Generate historical data ─────────────────────────────────────────
     hist_df = generate_historical_data(seed=42)
     grid_df = generate_2026_grid(seed=99)
-    driver_stats = compute_driver_stats(hist_df, circuit="China")
+    driver_stats = compute_driver_stats(hist_df, circuit="Japan")
     pred_features = build_2026_prediction_features(grid_df, driver_stats)
 
     # ── 2. Build training feature sets ──────────────────────────────────────
@@ -578,7 +578,7 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown(
-        "<div style='font-size:0.68rem;opacity:0.35;text-align:center;'>Shanghai International Circuit<br>2026 Formula 1 Season</div>",
+        "<div style='font-size:0.68rem;opacity:0.35;text-align:center;'>Suzuka International Racing Course<br>2026 Formula 1 Season</div>",
         unsafe_allow_html=True
     )
 
@@ -609,8 +609,8 @@ st.markdown("""
     <span class="badge">2026 SEASON</span>
     <span class="badge">ROUND 5</span>
     <span class="badge">SPRINT WEEKEND</span>
-    <h1>🏆 CHINESE GRAND PRIX</h1>
-    <div class="subtitle">AI-DRIVEN RACE PREDICTION  •  SHANGHAI INTERNATIONAL CIRCUIT  •  MONTE CARLO SIMULATION N={:,}</div>
+    <h1>🏆 JAPANESE GRAND PRIX</h1>
+    <div class="subtitle">AI-DRIVEN RACE PREDICTION  •  SUZUKA INTERNATIONAL RACING COURSE  •  MONTE CARLO SIMULATION N={:,}</div>
 </div>
 """.format(mc_runs), unsafe_allow_html=True)
 
@@ -630,7 +630,7 @@ tab_sprint, tab_gp, tab_analysis, tab_grid = st.tabs([
 # TAB 1 – SPRINT RACE
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_sprint:
-    st.markdown('<div class="section-title">SPRINT RACE PREDICTION — SHANGHAI 2026</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">SPRINT RACE PREDICTION — SUZUKA 2026</div>', unsafe_allow_html=True)
 
     top3_sprint = []
     for i in range(3):
@@ -672,7 +672,7 @@ with tab_sprint:
 # TAB 2 – GRAND PRIX
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_gp:
-    st.markdown('<div class="section-title">GRAND PRIX PREDICTION — CHINESE GP 2026</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">GRAND PRIX PREDICTION — JAPANESE GP 2026</div>', unsafe_allow_html=True)
 
     top3_gp = []
     for i in range(3):
@@ -744,7 +744,7 @@ with tab_analysis:
     pipeline_cols = st.columns(5)
     stages = [
         ("📥", "Raw F1 Data", "2018–2025\nHistorical Races"),
-        ("⚙️", "Feature Eng.", "Driver Stats\nTeam Performance\nShanghai History"),
+        ("⚙️", "Feature Eng.", "Driver Stats\nTeam Performance\nSuzuka History"),
         ("🤖", "ML Models", "LightGBM\nXGBoost\nLambdaRank"),
         ("🎲", "Monte Carlo", "10,000 Race\nSimulations"),
         ("🏆", "Predictions", "Win Probability\nPodium Prob.\nFinishing Order"),
@@ -759,7 +759,7 @@ with tab_analysis:
             </div>""", unsafe_allow_html=True)
 
     # Circuit characteristics
-    st.markdown('<div class="section-title">SHANGHAI CIRCUIT CHARACTERISTICS</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">SUZUKA CIRCUIT CHARACTERISTICS</div>', unsafe_allow_html=True)
     c1, c2, c3, c4, c5, c6 = st.columns(6)
     circuit_stats = [
         ("5.451 km", "TRACK LENGTH"),
@@ -778,7 +778,7 @@ with tab_analysis:
 # TAB 4 – FULL GRID
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_grid:
-    st.markdown('<div class="section-title">2026 CHINESE GP — FULL PREDICTED GRID</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">2026 JAPANESE GP — FULL PREDICTED GRID</div>', unsafe_allow_html=True)
 
     # Build combined table
     combined = mc_gp[["driver", "team", "win_probability", "podium_probability"]].copy()

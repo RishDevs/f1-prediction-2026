@@ -52,8 +52,8 @@ class SprintPredictionModel:
         self.feature_importance_ = {}
 
     def fit(self, X: pd.DataFrame, y: pd.Series):
-        cols = [c for c in self.feature_cols if c in X.columns]
-        X_sub = X[cols].fillna(X[cols].median())
+        self.feature_cols = [c for c in self.feature_cols if c in X.columns]
+        X_sub = X[self.feature_cols].fillna(X[self.feature_cols].median())
         X_tr, X_val, y_tr, y_val = train_test_split(
             X_sub, y, test_size=0.15, random_state=42, stratify=y if y.sum() > 1 else None
         )
@@ -63,7 +63,7 @@ class SprintPredictionModel:
         # Extract feature importance from inner estimator
         inner = self.model.calibrated_classifiers_[0].estimator
         if hasattr(inner, "feature_importances_"):
-            self.feature_importance_ = dict(zip(cols, inner.feature_importances_))
+            self.feature_importance_ = dict(zip(self.feature_cols, inner.feature_importances_))
 
         return self
 
@@ -78,7 +78,7 @@ class SprintPredictionModel:
 
     def predict_sprint_probabilities(self, pred_df: pd.DataFrame) -> pd.DataFrame:
         """
-        Predict sprint win probabilities for the 2026 Chinese GP grid.
+        Predict sprint win probabilities for the 2026 Japanese GP grid.
         Returns a DataFrame with drivers and their normalised win probabilities.
         """
         raw_proba = self.predict_win_proba(pred_df)

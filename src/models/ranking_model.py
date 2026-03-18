@@ -57,8 +57,8 @@ class DriverRankingModel:
         y_positions: finishing positions (lower = better)
         groups: list of group sizes (one per race)
         """
-        cols = [c for c in self.feature_cols if c in X.columns]
-        X_sub = X[cols].fillna(X[cols].median())
+        self.feature_cols = [c for c in self.feature_cols if c in X.columns]
+        X_sub = X[self.feature_cols].fillna(X[self.feature_cols].median())
 
         # LambdaRank needs relevance scores (higher = better result)
         # Convert positions so that 1st=20, 20th=1 etc.
@@ -87,7 +87,7 @@ class DriverRankingModel:
         )
         self.is_fitted = True
         self.feature_importance_ = dict(zip(
-            cols, self.model.feature_importance(importance_type="gain")
+            self.feature_cols, self.model.feature_importance(importance_type="gain")
         ))
         return self
 
@@ -103,7 +103,7 @@ class DriverRankingModel:
 
     def predict_finishing_order(self, pred_df: pd.DataFrame) -> pd.DataFrame:
         """
-        Predict full finishing order for the 2026 Chinese GP.
+        Predict full finishing order for the 2026 Japanese GP.
         Returns a DataFrame ranked from best to worst expected finish.
         """
         scores = self.predict_scores(pred_df)

@@ -27,14 +27,14 @@ PACE_FEATURES = [
     "weather_wet",
     "safety_car",
     "tire_degradation",
-    "shanghai_track_factor",
+    "suzuka_track_factor",
 ]
 
 
 class RacePaceModel:
     """
     LightGBM regressor that predicts the expected average race lap time
-    (in seconds) for each driver at the Shanghai International Circuit.
+    (in seconds) for each driver at the Suzuka Circuit.
     Lower lap time = faster pace = better expected race outcome.
     """
 
@@ -54,8 +54,8 @@ class RacePaceModel:
         self.val_mae_ = None
 
     def fit(self, X: pd.DataFrame, y_laptime: pd.Series):
-        cols = [c for c in self.feature_cols if c in X.columns]
-        X_sub = X[cols].fillna(X[cols].median())
+        self.feature_cols = [c for c in self.feature_cols if c in X.columns]
+        X_sub = X[self.feature_cols].fillna(X[self.feature_cols].median())
         X_tr, X_val, y_tr, y_val = train_test_split(
             X_sub, y_laptime, test_size=0.15, random_state=42
         )
@@ -66,7 +66,7 @@ class RacePaceModel:
         self.val_mae_ = mean_absolute_error(y_val, preds)
 
         if hasattr(self.model, "feature_importances_"):
-            self.feature_importance_ = dict(zip(cols, self.model.feature_importances_))
+            self.feature_importance_ = dict(zip(self.feature_cols, self.model.feature_importances_))
         return self
 
     def predict_pace(self, X: pd.DataFrame) -> np.ndarray:

@@ -55,10 +55,10 @@ TEAM_SECONDARY_COLORS = {
 
 # Constructor competitiveness index (0-1, 1 = best)
 CONSTRUCTOR_PACE_2026 = {
-    "Mercedes":     0.95,
-    "McLaren":      0.97,
-    "Red Bull":     0.91,
-    "Ferrari":      0.89,
+    "Mercedes":     0.98,
+    "McLaren":      0.90,
+    "Red Bull":     0.92,
+    "Ferrari":      0.94,
     "Aston Martin": 0.72,
     "Haas":         0.68,
     "Alpine":       0.65,
@@ -70,13 +70,13 @@ CONSTRUCTOR_PACE_2026 = {
 
 # Driver skill ratings (0-1, based on historical performance)
 DRIVER_SKILL_2026 = {
-    "George Russell":    0.93,
-    "Kimi Antonelli":    0.80,
-    "Lando Norris":      0.95,
-    "Oscar Piastri":     0.90,
+    "George Russell":    0.96,
+    "Kimi Antonelli":    0.94,
+    "Lando Norris":      0.90,
+    "Oscar Piastri":     0.88,
     "Max Verstappen":    0.97,
     "Isack Hadjar":      0.79,
-    "Charles Leclerc":   0.91,
+    "Charles Leclerc":   0.93,
     "Lewis Hamilton":    0.92,
     "Fernando Alonso":   0.90,
     "Lance Stroll":      0.74,
@@ -94,25 +94,25 @@ DRIVER_SKILL_2026 = {
     "Sergio Perez":      0.82,
 }
 
-# Shanghai International Circuit
+# Suzuka International Racing Course (Japan GP)
 CIRCUIT_INFO = {
-    "name": "Shanghai International Circuit",
-    "country": "China",
-    "city": "Shanghai",
-    "length_km": 5.451,
-    "corners": 16,
-    "race_laps": 56,
-    "sprint_laps": 19,
-    "race_distance_km": 305.066,
+    "name": "Suzuka International Racing Course",
+    "country": "Japan",
+    "city": "Suzuka",
+    "length_km": 5.807,
+    "corners": 18,
+    "race_laps": 53,
+    "sprint_laps": 17,
+    "race_distance_km": 307.471,
     "sprint_distance_km": 100.0,
-    "drs_zones": 2,
-    "overtaking_difficulty": 0.35,   # lower = easier to overtake
-    "safety_car_probability": 0.42,
-    "tire_degradation": "Medium-High",
-    "lap_record": "1:32.238",
-    "lap_record_holder": "Michael Schumacher",
-    "lap_record_year": 2004,
-    "first_gp": 2004,
+    "drs_zones": 1,
+    "overtaking_difficulty": 0.75,   # lower = easier to overtake
+    "safety_car_probability": 0.50,
+    "tire_degradation": "High",
+    "lap_record": "1:30.983",
+    "lap_record_holder": "Lewis Hamilton",
+    "lap_record_year": 2019,
+    "first_gp": 1987,
     "surface": "Tarmac",
 }
 
